@@ -6,6 +6,7 @@ import java.awt.Image;
 import java.sql.*;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 import javax.swing.WindowConstants;
 
 public class RegistrarUsuarios extends javax.swing.JFrame {
@@ -44,7 +45,6 @@ public class RegistrarUsuarios extends javax.swing.JFrame {
         txt_mail = new javax.swing.JTextField();
         txt_telefono = new javax.swing.JTextField();
         txt_username = new javax.swing.JTextField();
-        txt_nombre4 = new javax.swing.JTextField();
         txt_password = new javax.swing.JPasswordField();
         cmb_niveles = new javax.swing.JComboBox<>();
         jButton1 = new javax.swing.JButton();
@@ -117,13 +117,6 @@ public class RegistrarUsuarios extends javax.swing.JFrame {
         txt_username.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         getContentPane().add(txt_username, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 70, 210, -1));
 
-        txt_nombre4.setBackground(new java.awt.Color(153, 153, 255));
-        txt_nombre4.setFont(new java.awt.Font("Arial", 1, 16)); // NOI18N
-        txt_nombre4.setForeground(new java.awt.Color(255, 255, 255));
-        txt_nombre4.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        txt_nombre4.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
-        getContentPane().add(txt_nombre4, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 70, 210, -1));
-
         txt_password.setBackground(new java.awt.Color(153, 153, 255));
         txt_password.setFont(new java.awt.Font("Arial", 1, 16)); // NOI18N
         txt_password.setForeground(new java.awt.Color(255, 255, 255));
@@ -150,15 +143,125 @@ public class RegistrarUsuarios extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-     
+ 
+        int permisos_cmb, validacion =0;
+        String nombre, mail, telefono, username, pass, permisos_String="";
         
+        mail=txt_mail.getText().trim();
+        username=txt_username.getText().trim();
+        pass=txt_password.getText().trim();
+        nombre=txt_nombre.getText().trim();
+        telefono=txt_telefono.getText().trim();
+        permisos_cmb=cmb_niveles.getSelectedIndex()+1;
         
+        if(mail.equals("")){
         
+        txt_mail.setBackground(Color.red);
+        validacion++;
         
+        }
         
+        if(username.equals("")){
         
+        txt_username.setBackground(Color.red);
+        validacion++;
+        
+        }
+        if(nombre.equals("")){
+        
+        txt_nombre.setBackground(Color.red);
+        validacion++;
+        
+        }
+        if(telefono.equals("")){
+        
+        txt_telefono.setBackground(Color.red);
+        validacion++;
+        
+        }
+        if(pass.equals("")){
+        
+        txt_password.setBackground(Color.red);
+        validacion++;
+        
+        }
+        
+        if (permisos_cmb==1) {
+            
+            permisos_String="Administrador";
+            
+        } else if(permisos_cmb==2){
+            
+            permisos_String="Capturista"; 
+        } else if(permisos_cmb==3){
+            
+            permisos_String="Tecnico"; 
     }//GEN-LAST:event_jButton1ActionPerformed
-
+ 
+        try {
+            Connection cn =Conexion.conectar();
+            PreparedStatement pst=cn.prepareStatement("select username from usuarios where username = '" + username + "'");
+            ResultSet rs =pst.executeQuery();
+            
+            if (rs.next()) {
+               txt_username.setBackground(Color.red);
+                JOptionPane.showMessageDialog(null, "Nombre de usuario no disponible");
+                cn.close();
+                
+            } else {
+                
+                cn.close();
+                
+                if (validacion == 0) {
+                    
+                    try {
+                        
+                        Connection cn2 =Conexion.conectar();
+                        PreparedStatement pst2 =cn2.prepareStatement("insert into usuarios values (?,?,?,?,?,?,?,?,?)");
+                        pst2.setInt(1,0);
+                        pst2.setString(2,nombre);
+                        pst2.setString(3,mail);
+                        pst2.setString(4,telefono);
+                        pst2.setString(5,username);
+                        pst2.setString(6,pass);
+                        pst2.setString(7,permisos_String);
+                        pst2.setString(8,"Activo");
+                        pst2.setString(9,user);
+                        pst2.executeUpdate();
+                        cn2.close();
+                        
+                        Limpiar();
+                        txt_mail.setBackground(Color.green);
+                        txt_username.setBackground(Color.green);
+                        txt_password.setBackground(Color.green);
+                        txt_nombre.setBackground(Color.green);
+                        txt_telefono.setBackground(Color.green);
+                        
+                        JOptionPane.showMessageDialog(null, "Registro exitoso");
+                        this.dispose();
+                        
+                        
+                    } catch (SQLException e) {
+                        System.err.println("Error al registrar usuario" + e);
+                        JOptionPane.showMessageDialog(null, "Error al conectarte contacte al administrador");
+                    }
+                    
+                } else {
+                    
+                    JOptionPane.showMessageDialog(null, "Debe llenar todos los campos");
+                }
+                
+            }
+        } catch (Exception e) {
+            System.err.println("Error en validar nombres de usuario" + e);
+            JOptionPane.showMessageDialog(null, "Error al comparar usuarios contacte al administrador");
+        }
+    
+    
+    
+    }
+    
+    
     /**
      * @param args the command line arguments
      */
@@ -208,9 +311,19 @@ public class RegistrarUsuarios extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel_wallpaper;
     private javax.swing.JTextField txt_mail;
     private javax.swing.JTextField txt_nombre;
-    private javax.swing.JTextField txt_nombre4;
     private javax.swing.JPasswordField txt_password;
     private javax.swing.JTextField txt_telefono;
     private javax.swing.JTextField txt_username;
     // End of variables declaration//GEN-END:variables
+public void Limpiar(){
+
+txt_mail.setText("");
+txt_nombre.setText("");
+txt_password.setText("");
+txt_telefono.setText("");
+txt_username.setText("");
+cmb_niveles.setSelectedIndex(0);
+
+}
+
 }
